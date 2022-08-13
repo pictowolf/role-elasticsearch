@@ -1,0 +1,19 @@
+---
+- name: Add Elastic GPG key for downloads
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+- name: Add Elastic repo to instance
+  ansible.builtin.yum_repository:
+    name: elasticsearch
+    description: "Elasticsearch repository for {{ es_major_version }} packages"
+    baseurl: "https://artifacts.elastic.co/packages/{{ es_major_version }}.x/yum"
+    gpgcheck: yes
+    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    enabled: yes
+
+- name: Install Elastic
+  ansible.builtin.package:
+    name: "elasticsearch-{{ es_major_version }}.{{ es_minor_version }}.x86_64"
+    state: present

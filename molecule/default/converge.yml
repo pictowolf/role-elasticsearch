@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include pictowolf.elasticsearch"
+      include_role:
+        name: "pictowolf.elasticsearch"
