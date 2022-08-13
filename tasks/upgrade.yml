@@ -12,7 +12,7 @@
 
 - name: Check if upgraded version is already installed
   ansible.builtin.package:
-    list: "elasticsearch-{{ es_upgrade_version }}.x86_64"
+    list: "elasticsearch-{{ es_major_version }}.{{ es_minor_version }}.x86_64"
   register: installed_es_version
 
 
@@ -40,11 +40,10 @@
       ansible.builtin.service:
         name: elasticsearch
         state: stopped
-      when: es_upgrade_version
 
     - name: Upgrade Elastic
       ansible.builtin.package:
-        name: "elasticsearch-{{ es_upgrade_version }}.x86_64"
+        name: "elasticsearch-{{ es_major_version }}.{{ es_minor_version }}.x86_64"
         state: present
 
     - name: Start Elastic

@@ -17,13 +17,12 @@ Available variables are listed below, along with default values (see defaults/ma
 es_major_version Default value: 7
 es_minor_version: 16.1-1
 ```
-Setting the major and minor version of Elasticsearch you are wanting to install. This will also ensure the correct yum repository is added to your instances.
+Setting the major and minor version of Elasticsearch you are wanting to install. This will also ensure the correct yum repository is added to your instances. Change the version and set es_update: true to upgrade the cluster. See more information below.
 
 ```yaml
 es_upgrade: false
-es_upgrade_version: 7.16.2-1 # Need to specify tag upgrade for this to do anything.
 ```
-Only runs upgrade tasks and will upgrade the cluster to the specified version. <strong>Ensure you have Serial: 1 set in your playbook for upgrading</strong>. Within the upgrade, shard allocation will be limited to primary shards only to ensure a quick upgrade. This follows Elasticsearch best pracise on rolling upgrades. Ensure you set the upgrade version in es_minor_version once complete.
+Runs upgrade tasks and will upgrade the cluster to the specified version. <strong>Ensure you have Serial: 1 set in your playbook for upgrading</strong>. Within the upgrade, shard allocation will be limited to primary shards only to ensure a quick upgrade. This follows Elasticsearch best pracise on rolling upgrades.
 
 ```yaml
 es_cluster_name: dev-cluster
