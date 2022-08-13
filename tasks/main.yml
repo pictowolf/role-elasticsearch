@@ -1,6 +1,18 @@
 ---
 - name: Include install tasks
   ansible.builtin.include_tasks: install.yml
+  when: es_upgrade == false
 
 - name: Include configuration tasks
   ansible.builtin.include_tasks: configure.yml
+  when: es_upgrade == false
+
+- name: Include SSL tasks
+  ansible.builtin.include_tasks: ssl.yml
+  when: 
+    - es_generate_certs == true
+    - es_upgrade == false
+
+- name: Include upgrade tasks
+  ansible.builtin.include_tasks: upgrade.yml
+  when: es_upgrade == true

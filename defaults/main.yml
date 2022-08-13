@@ -1,7 +1,9 @@
 ---
 # defaults file for elasticsearch
 es_major_version: 7
-es_minor_version: 15.2-1
+es_minor_version: 17.5-1
+es_upgrade: false
+es_upgrade_version: 7.17.5-1 # es_upgrade must be set to true for this to upgrade.
 
 es_cluster_name: dev-cluster
 es_data_path: /data/elasticsearch
@@ -12,3 +14,4 @@ es_group: elasticsearch
 es_heap_size: 1g
 es_start_service: true
 es_restart_on_change: true
+es_generate_certs: false

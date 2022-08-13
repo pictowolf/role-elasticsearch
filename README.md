@@ -11,19 +11,50 @@ No requirements for this role.
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Available variables are listed below, along with default values (see defaults/main.yml):
 
-Dependencies
-------------
+```yaml
+es_major_version Default value: 7
+es_minor_version: 16.1-1
+```
+Setting the major and minor version of Elasticsearch you are wanting to install. This will also ensure the correct yum repository is added to your instances.
 
-No dependencies for this role.
+```yaml
+es_upgrade: false
+es_upgrade_version: 7.16.2-1 # Need to specify tag upgrade for this to do anything.
+```
+Only runs upgrade tasks and will upgrade the cluster to the specified version. <strong>Ensure you have Serial: 1 set in your playbook for upgrading</strong>. Within the upgrade, shard allocation will be limited to primary shards only to ensure a quick upgrade. This follows Elasticsearch best pracise on rolling upgrades. Ensure you set the upgrade version in es_minor_version once complete.
+
+```yaml
+es_cluster_name: dev-cluster
+es_data_path: /data/elasticsearch
+es_log_path: /var/log/elasticsearch
+es_user: elasticsearch
+es_group: elasticsearch
+```
+Basic cluster information including the path for logd and data.
+
+```yaml
+es_heap_size: 1g
+```
+Sets the JVM heap size to the value. This will set both xms and xmx to the same value. This should be half of your memory on the instance. Don't set this above 32GB or you will see performance issue, instead add more instances.
+
+```yaml
+es_start_service: true
+es_restart_on_change: true
+```
+Both of these settings are if you don't want the service to start on install. EG, you have extra plugins to configure first. The restart_on_change will restart any time you ammend the elasticsearch.yml.
+
+```yaml
+es_generate_certs: false
+```
+Still WiP. This will be used for xpack security and internode TLS.
 
 Example Playbook
 ----------------
-
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: elastic
-      roles:
-         - pictowolf.elasticsearch
-
+```yaml
+---
+- hosts: elastic
+  roles:
+      - pictowolf.elasticsearch
+```
