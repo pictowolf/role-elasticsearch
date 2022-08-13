@@ -1,2 +1,10 @@
 ---
 # handlers file for elasticsearch
+
+- name: restart elasticsearch
+  become: yes
+  ansible.builtin.service: name=elasticsearch state=restarted enabled=yes
+  when:
+    - es_restart_on_change
+    - es_start_service
+  register: es_restarted
