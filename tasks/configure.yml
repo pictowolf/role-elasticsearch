@@ -3,3 +3,8 @@
   ansible.builtin.template:
     src: elasticsearch.yml.j2
     dest: /etc/elasticsearch/elasticsearch.yml
+
+- name: Set jvm.options
+  ansible.builtin.template:
+    src: jvm.options.j2
+    dest: /etc/elasticsearch/jvm.options

@@ -6,3 +6,5 @@ es_minor_version: 15.2-1
 es_cluster_name: dev-cluster
 es_data_path: /data/elasticsearch
 es_log_path: /var/log/elasticsearch
+
+es_heap_size: 1g
