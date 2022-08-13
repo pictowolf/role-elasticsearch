@@ -1,0 +1,73 @@
+---
+- name: Ensure elasticsearch already present
+  ansible.builtin.service:
+    name: name=elasticsearch state=started
+
+- name: ensure elasticsearch is up and available
+  ansible.builtin.wait_for:
+    host: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+    port: 9200
+    delay: 5
+
+- name: Perform upgrade process as root
+  block:
+    - name: Disable shard allocation
+      ansible.builtin.uri:
+        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_cluster/settings"
+        body: '{"persistent":{"cluster.routing.allocation.enable":"primaries"}}' # specify no shard allocation
+        body_format: json
+        method: PUT
+      
+    - name: Stop non essential indexing to speed up shard recovery
+      ansible.builtin.uri:
+        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_flush/synced"
+        method: POST
+      ignore_errors: yes
+
+    - name: Get cluster ID
+      ansible.builtin.uri:
+        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200"
+      register: pre_upgrade_cluster_info
+
+    - name: Shut down node
+      ansible.builtin.service:
+        name: name=elasticsearch state=stopped
+
+    - name: Upgrade node
+      ansible.builtin.package:
+        name: "elasticsearch-{{ es_upgrade_version }}.x86_64"
+        state: present
+
+    - name: bring up node
+      ansible.builtin.service:
+        name: name=elasticsearch state=started
+      notify: wait for elasticsearch to start
+
+    - meta: flush_handlers
+
+    - name: validate it joins cluster
+      ansible.builtin.uri:
+        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200"
+      register: post_upgrade_cluster_info
+      until: pre_upgrade_cluster_info.json.cluster_uuid == post_upgrade_cluster_info.json.cluster_uuid
+      retries: 3
+      delay: 10
+
+    - name: reenable shard allocation
+      ansible.builtin.uri: 
+        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_cluster/settings"
+        body: '{"persistent":{"cluster.routing.allocation.enable":null}}' 
+        body_format: json
+        method: PUT
+
+    - name: Wait for elasticsearch to recover
+      ansible.builtin.uri:
+        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_cat/health"
+        method: GET
+        return_content: yes
+        status_code: 200
+        body_format: json
+      register: result
+      until: result | search('green')
+      retries: 10
+      delay: 30
