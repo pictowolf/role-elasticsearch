@@ -5,10 +5,9 @@
 - name: Include configuration tasks
   ansible.builtin.include_tasks: configure.yml
 
-- name: Include SSL tasks
-  ansible.builtin.include_tasks: ssl.yml
-  when: 
-    - es_generate_certs == true
+- name: Include security tasks
+  ansible.builtin.include_tasks: security.yml
+  when: es_xpack_enabled == true or es_generate_certs == true
 
 - name: Include upgrade tasks
   ansible.builtin.include_tasks: upgrade.yml

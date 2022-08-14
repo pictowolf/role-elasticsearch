@@ -13,4 +13,13 @@ es_group: elasticsearch
 es_heap_size: 1g
 es_start_service: true
 es_restart_on_change: true
-es_generate_certs: false
+
+es_xpack_enabled: true
+es_bootstrap_password: testing
+
+es_tls_enabled: true
+es_generate_certs: true
+
+es_tls_cert: /etc/elasticsearch/mycert.pem
+es_tls_key: /etc/elasticsearch/mykey.pem
+es_tls_ca: /etc/elasticsearch/myca.pem

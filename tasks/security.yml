@@ -1,0 +1,101 @@
+---
+- name: Create Elastic keystore
+  block:
+  - name: create the keystore if it doesn't exist yet
+    ansible.builtin.command:
+      argv:
+        - /usr/share/elasticsearch/bin/elasticsearch-keystore
+        - create
+      creates: "/etc/elasticsearch/elasticsearch.keystore"
+
+  - name: Check if bootstrap password is set
+    ansible.builtin.command: 
+      argv:
+        - /usr/share/elasticsearch/bin/elasticsearch-keystore
+        - list
+    register: list_keystore
+    changed_when: false
+    check_mode: no
+
+  - name: Create Bootstrap password for elastic user
+    ansible.builtin.shell: "echo {{ es_bootstrap_password | quote }} | /usr/share/elasticsearch/bin/elasticsearch-keystore add -x 'bootstrap.password'"
+    when:
+      - list_keystore is defined and 'bootstrap.password' not in list_keystore.stdout_lines and es_bootstrap_password is defined
+    no_log: true
+    notify: restart elasticsearch
+  when: es_xpack_enabled == true
+
+- name: Create certificate folder
+  ansible.builtin.file:
+    path: /etc/elasticsearch/certs
+    state: directory
+    owner: root
+    group: elasticsearch
+    mode: 0770
+  when: es_generate_certs == true
+
+- name: Generate Elastic certificates
+  block:
+  - name: Generate self signed CA
+    ansible.builtin.command:
+      argv:
+        - /usr/share/elasticsearch/bin/elasticsearch-certutil
+        - ca
+        - --out 
+        - /etc/elasticsearch/certs/elastic-ca.p12
+        - --pass
+        - ""
+      creates: /etc/elasticsearch/certs/elastic-ca.p12
+    when: 
+      - inventory_hostname == groups['master'][0]
+
+  - name: Generate self signed certificate
+    ansible.builtin.command:
+      argv:
+        - /usr/share/elasticsearch/bin/elasticsearch-certutil
+        - cert
+        - --ca 
+        - /etc/elasticsearch/certs/elastic-ca.p12
+        - --ca-pass
+        - ""
+        - --out
+        - /etc/elasticsearch/certs/elastic-certs.p12
+        - --pass
+        - ""
+      creates: /etc/elasticsearch/certs/elastic-certs.p12
+    register: certificate_generated
+    when: 
+      - inventory_hostname == groups['master'][0]
+
+  - name: Change certificate permissions
+    ansible.builtin.file:
+      path: /etc/elasticsearch/certs/elastic-certs.p12
+      owner: root
+      group: "{{ es_group }}"
+      mode: '0666'
+    when: 
+      - inventory_hostname == groups['master'][0]
+
+  - name: Move certificate to Ansible server
+    ansible.builtin.fetch:
+      src: /etc/elasticsearch/certs/elastic-certs.p12
+      dest: /tmp/elastic-certs.p12
+      flat: true
+    when: 
+    - inventory_hostname == groups['master'][0]
+    - groups['master'] | length > 1
+
+  - name: Move certificate onto all other instances
+    ansible.builtin.copy:
+      src: /tmp/elastic-certs.p12
+      dest: /etc/elasticsearch/certs/elastic-certs.p12
+      owner: root
+      group: "{{ es_group }}"
+      mode: '0666'
+    when: 
+    - inventory_hostname != groups['master'][0]
+    - groups['master'] | length > 1
+
+  when: 
+    - es_generate_certs == true
+    - es_major_version == 7

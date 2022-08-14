@@ -69,7 +69,6 @@ http.port: 9200
 discovery.type: single-node
 #discovery.seed_hosts:
 {% elif groups['master'] | length > 1 -%}
-discovery.type: multi-node
 discovery.seed_hosts:
 {% for host in groups['master'] %}
   - {{ hostvars[host]['ansible_default_ipv4']['address'] }} # {{ host }}  
@@ -95,16 +94,28 @@ cluster.initial_master_nodes:
 #action.destructive_requires_name: true
 #
 # ---------------------------------- Security -----------------------------------
-{#
+#
 xpack.security.enabled: {{ es_xpack_enabled }}
 xpack.security.http.ssl.enabled: {{ es_tls_enabled }}
 xpack.security.transport.ssl.enabled: {{ es_tls_enabled }}
-{% if es_tls_enabled == true %}
+#
+{% if es_tls_enabled == true and es_major_version == 7 %}
+  {%- if es_generate_certs == true %}
+xpack.security.transport.ssl.verification_mode: certificate
+xpack.security.transport.ssl.client_authentication: required
+xpack.security.transport.ssl.keystore.path: /etc/elasticsearch/certs/elastic-certs.p12
+xpack.security.transport.ssl.truststore.path: /etc/elasticsearch/certs/elastic-certs.p12
+#
+xpack.security.http.ssl.client_authentication: optional
+xpack.security.http.ssl.keystore.path: /etc/elasticsearch/certs/elastic-certs.p12
+xpack.security.http.ssl.truststore.path: /etc/elasticsearch/certs/elastic-certs.p12
+  {%- elif es_generate_certs == false %}
 xpack.security.http.ssl.key: {{ es_tls_key }}
 xpack.security.http.ssl.certificate: {{ es_tls_cert }}
 xpack.security.http.ssl.certificate_authorities: {{ es_tls_ca }}
+#
 xpack.security.transport.ssl.key: {{ es_tls_key }}
-xpack.security.transport.ssl.certificate:  {{ es_tls_cert }}
+xpack.security.transport.ssl.certificate: {{ es_tls_cert }}
 xpack.security.transport.ssl.certificate_authorities: {{ es_tls_ca }}
+  {% endif %}
 {% endif %}
-#}

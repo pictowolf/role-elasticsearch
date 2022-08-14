@@ -47,7 +47,7 @@ Both of these settings are if you don't want the service to start on install. EG
 ```yaml
 es_generate_certs: false
 ```
-Still WiP. This will be used for xpack security and internode TLS.
+This will generate and setup transport TLS and HTTP TLS using self signed certificates from Elastic.
 
 Example Playbook
 ----------------
