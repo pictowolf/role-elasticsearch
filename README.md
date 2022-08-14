@@ -1,7 +1,7 @@
 Elasticsearch
 =========
 
-An Elasticsearch role that can deploy a standalone node or a cluster. All tested with molecule.
+An Elasticsearch role that can deploy a standalone node or a cluster. All tested with molecule. Ansible role will deploy wither Elastic 7.x or Elastic 8.x
 
 Requirements
 ------------
@@ -45,10 +45,22 @@ es_restart_on_change: true
 Both of these settings are if you don't want the service to start on install. EG, you have extra plugins to configure first. The restart_on_change will restart any time you ammend the elasticsearch.yml.
 
 ```yaml
+es_bootstrap_password: testing
+```
+Sets the default password for the elastic user. This is required to login via any of the endpoints.
+
+```yaml
 es_tls_enabled: true
 es_generate_certs: false
 ```
 This will generate and setup transport TLS and HTTP TLS using self signed certificates from Elastic.
+
+```yaml
+es_tls_cert: /etc/elasticsearch/mycert.pem
+es_tls_key: /etc/elasticsearch/mykey.pem
+es_tls_ca: /etc/elasticsearch/myca.pem
+```
+Set these to use custom certificates that are not self signed. Ensure you set es_tls_enabled: true and to es_generate_certs: false.
 
 Example Playbook
 ----------------
