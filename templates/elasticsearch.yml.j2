@@ -99,7 +99,7 @@ xpack.security.enabled: true
 xpack.security.http.ssl.enabled: {{ es_tls_enabled }}
 xpack.security.transport.ssl.enabled: {{ es_tls_enabled }}
 #
-{% if es_tls_enabled == true and es_major_version == 7 %}
+{% if es_tls_enabled == true %}
   {%- if es_generate_certs == true %}
 xpack.security.transport.ssl.verification_mode: certificate
 xpack.security.transport.ssl.client_authentication: required

@@ -24,6 +24,21 @@
     no_log: true
     notify: restart elasticsearch
 
+  - name: Delete Elastic 8.x default TLS secrets
+    ansible.builtin.command: 
+      argv:
+        - /usr/share/elasticsearch/bin/elasticsearch-keystore
+        - remove
+        - "{{ item }}"
+    with_items:
+      - 'xpack.security.http.ssl.keystore.secure_password'
+      - 'xpack.security.transport.ssl.keystore.secure_password'
+      - 'xpack.security.transport.ssl.truststore.secure_password'
+    when:
+      - list_keystore is defined and 'bootstrap.password' not in list_keystore.stdout_lines and es_bootstrap_password is defined
+      - es_major_version == 8 
+    notify: restart elasticsearch
+
 - name: Create certificate folder
   ansible.builtin.file:
     path: /etc/elasticsearch/certs
@@ -97,4 +112,3 @@
 
   when: 
     - es_generate_certs == true
-    - es_major_version == 7

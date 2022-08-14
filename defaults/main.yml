@@ -1,7 +1,7 @@
 ---
 # defaults file for elasticsearch
-es_major_version: 7
-es_minor_version: 17.5-1
+es_major_version: 8
+es_minor_version: 3.3-1
 es_upgrade: false
 
 es_cluster_name: dev-cluster
