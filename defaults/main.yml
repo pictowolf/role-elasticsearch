@@ -14,7 +14,6 @@ es_heap_size: 1g
 es_start_service: true
 es_restart_on_change: true
 
-es_xpack_enabled: true
 es_bootstrap_password: testing
 
 es_tls_enabled: true

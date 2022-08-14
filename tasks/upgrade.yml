@@ -1,4 +1,14 @@
 ---
+- name: Set es_http_scheme to HTTP
+  ansible.builtin.set_fact:
+    es_http_scheme: http
+  when: es_tls_enabled == false
+
+- name: Set es_http_scheme to HTTPS
+  ansible.builtin.set_fact:
+    es_http_scheme: https
+  when: es_tls_enabled == true
+
 - name: Ensure Elastic is present
   ansible.builtin.service:
     name: elasticsearch
@@ -20,20 +30,32 @@
   block:
     - name: Disable shard allocation
       ansible.builtin.uri:
-        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_cluster/settings"
+        url: "{{ es_http_scheme }}://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_cluster/settings"
         body: '{"persistent":{"cluster.routing.allocation.enable":"primaries"}}' # specify no shard allocation
+        user: elastic
+        password: "{{ es_bootstrap_password }}"
+        force_basic_auth: yes
         body_format: json
         method: PUT
+        validate_certs: false
 
     - name: Stop non essential indexing to speed up shard recovery
       ansible.builtin.uri:
-        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_flush/synced"
+        url: "{{ es_http_scheme }}://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_flush/synced"
         method: POST
+        user: elastic
+        password: "{{ es_bootstrap_password }}"
+        force_basic_auth: yes
+        validate_certs: false
       ignore_errors: yes
 
     - name: Get cluster ID
       ansible.builtin.uri:
-        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200"
+        url: "{{ es_http_scheme }}://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200"
+        user: elastic
+        password: "{{ es_bootstrap_password }}"
+        force_basic_auth: yes
+        validate_certs: false
       register: pre_upgrade_cluster_info
 
     - name: Stop Elastic
@@ -53,14 +75,22 @@
 
     - name: Ensure Elastic instance is working
       ansible.builtin.uri:
-        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200"
+        url: "{{ es_http_scheme }}://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200"
         status_code: 200
+        user: elastic
+        password: "{{ es_bootstrap_password }}"
+        force_basic_auth: yes
+        validate_certs: false
       retries: 3
       delay: 10
 
     - name: Validate instance joins the cluster
       ansible.builtin.uri:
-        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200"
+        url: "{{ es_http_scheme }}://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200"
+        user: elastic
+        password: "{{ es_bootstrap_password }}"
+        force_basic_auth: yes
+        validate_certs: false
       register: post_upgrade_cluster_info
       until: pre_upgrade_cluster_info.json.cluster_uuid == post_upgrade_cluster_info.json.cluster_uuid
       retries: 3
@@ -68,14 +98,22 @@
 
     - name: Enable shard allocation
       ansible.builtin.uri: 
-        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_cluster/settings"
-        body: '{"persistent":{"cluster.routing.allocation.enable":null}}' 
+        url: "{{ es_http_scheme }}://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_cluster/settings"
+        body: '{"persistent":{"cluster.routing.allocation.enable":null}}'
+        user: elastic
+        password: "{{ es_bootstrap_password }}"
+        force_basic_auth: yes
+        validate_certs: false 
         body_format: json
         method: PUT
 
     - name: Wait for Elastic to recover
       ansible.builtin.uri:
-        url: "http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_cat/health"
+        url: "{{ es_http_scheme }}://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:9200/_cat/health"
+        user: elastic
+        password: "{{ es_bootstrap_password }}"
+        force_basic_auth: yes
+        validate_certs: false
         method: GET
         return_content: yes
         status_code: 200

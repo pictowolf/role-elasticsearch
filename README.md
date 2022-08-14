@@ -45,6 +45,7 @@ es_restart_on_change: true
 Both of these settings are if you don't want the service to start on install. EG, you have extra plugins to configure first. The restart_on_change will restart any time you ammend the elasticsearch.yml.
 
 ```yaml
+es_tls_enabled: true
 es_generate_certs: false
 ```
 This will generate and setup transport TLS and HTTP TLS using self signed certificates from Elastic.

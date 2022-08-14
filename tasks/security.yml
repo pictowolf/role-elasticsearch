@@ -23,7 +23,6 @@
       - list_keystore is defined and 'bootstrap.password' not in list_keystore.stdout_lines and es_bootstrap_password is defined
     no_log: true
     notify: restart elasticsearch
-  when: es_xpack_enabled == true
 
 - name: Create certificate folder
   ansible.builtin.file:

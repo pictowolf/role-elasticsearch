@@ -7,7 +7,7 @@
 
 - name: Include security tasks
   ansible.builtin.include_tasks: security.yml
-  when: es_xpack_enabled == true or es_generate_certs == true
+  when: es_generate_certs == true
 
 - name: Include upgrade tasks
   ansible.builtin.include_tasks: upgrade.yml
