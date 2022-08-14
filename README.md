@@ -1,7 +1,7 @@
 Elasticsearch
 =========
 
-An Elasticsearch role that can deploy a standalone node or a cluster. All tested with molecule. Ansible role will deploy wither Elastic 7.x or Elastic 8.x
+An Elasticsearch role that can deploy a standalone node or a cluster. All tested with molecule. This Ansible role will deploy either Elastic 7.x or Elastic 8.x
 
 Requirements
 ------------
