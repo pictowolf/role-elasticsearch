@@ -46,7 +46,7 @@
     owner: root
     group: elasticsearch
     mode: 0770
-  when: es_generate_certs == true
+  when: es_generate_certs
 
 - name: Generate Elastic certificates
   block:
@@ -111,4 +111,4 @@
     - groups['master'] | length > 1
 
   when: 
-    - es_generate_certs == true
+    - es_generate_certs

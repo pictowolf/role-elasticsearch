@@ -2,12 +2,12 @@
 - name: Set es_http_scheme to HTTP
   ansible.builtin.set_fact:
     es_http_scheme: http
-  when: es_tls_enabled == false
+  when: not es_tls_enabled
 
 - name: Set es_http_scheme to HTTPS
   ansible.builtin.set_fact:
     es_http_scheme: https
-  when: es_tls_enabled == true
+  when: es_tls_enabled
 
 - name: Ensure Elastic is present
   ansible.builtin.service:
@@ -47,7 +47,6 @@
         password: "{{ es_bootstrap_password }}"
         force_basic_auth: yes
         validate_certs: false
-      ignore_errors: yes
 
     - name: Get cluster ID
       ansible.builtin.uri:
@@ -121,4 +120,4 @@
       until: result | regex_search('green')
       retries: 10
       delay: 30
-  when: installed_es_version.results | selectattr("yumstate", "equalto", "installed") | list | length == 0
+  when: installed_es_version.results | selectattr("yumstate", "equalto", "installed") | list | length 0
