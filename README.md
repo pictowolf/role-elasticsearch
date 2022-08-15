@@ -14,7 +14,7 @@ Role Variables
 Available variables are listed below, along with default values (see defaults/main.yml):
 
 ```yaml
-es_major_version Default value: 7
+es_major_version: 7
 es_minor_version: 16.1-1
 ```
 Setting the major and minor version of Elasticsearch you are wanting to install. This will also ensure the correct yum repository is added to your instances. Change the version and set es_update: true to upgrade the cluster. See more information below.
