@@ -78,8 +78,7 @@
         - ""
       creates: /etc/elasticsearch/certs/elastic-certs.p12
     register: certificate_generated
-    when: 
-      - inventory_hostname == groups['master'][0]
+    when: inventory_hostname == groups['master'][0]
 
   - name: Change certificate permissions
     ansible.builtin.file:
@@ -87,8 +86,7 @@
       owner: root
       group: "{{ es_group }}"
       mode: '0666'
-    when: 
-      - inventory_hostname == groups['master'][0]
+    when: inventory_hostname == groups['master'][0]
 
   - name: Move certificate to Ansible server
     ansible.builtin.fetch:
@@ -110,5 +108,4 @@
     - inventory_hostname != groups['master'][0]
     - groups['master'] | length > 1
 
-  when: 
-    - es_generate_certs
+  when: es_generate_certs

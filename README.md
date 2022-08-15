@@ -64,9 +64,21 @@ Set these to use custom certificates that are not self signed. Ensure you set es
 
 Example Playbook
 ----------------
+
+Normal playbook
 ```yaml
 ---
 - hosts: elastic
   roles:
       - pictowolf.elasticsearch
 ```
+
+Upgrade playbook
+```yaml
+---
+- hosts: elastic
+  serial: 1
+  roles:
+      - pictowolf.elasticsearch
+```
+

@@ -25,7 +25,6 @@
     list: "elasticsearch-{{ es_major_version }}.{{ es_minor_version }}.x86_64"
   register: installed_es_version
 
-
 - name: Perform upgrade process
   block:
     - name: Disable shard allocation
